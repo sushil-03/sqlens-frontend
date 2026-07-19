@@ -24,6 +24,7 @@ export default function Home() {
   const [keyInsight, setKeyInsight] = React.useState("");
   const [context, setContext] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
+  const [errorStatus, setErrorStatus] = React.useState<number | null>(null);
 
   const begin = (count: number, submittedContext: string | undefined, work: () => Promise<UploadResult>) => {
     setFileCount(count);
@@ -32,6 +33,7 @@ export default function Home() {
     setKeyInsight("");
     setContext(submittedContext?.trim() ?? "");
     setError(null);
+    setErrorStatus(null);
     setStage("loading");
 
     work()
@@ -51,6 +53,7 @@ export default function Home() {
             ? err.message
             : "Something unexpected went wrong. Please try again."
         );
+        setErrorStatus(err instanceof ApiError ? err.status : null);
       });
   };
 
@@ -61,6 +64,7 @@ export default function Home() {
     setKeyInsight("");
     setContext("");
     setError(null);
+    setErrorStatus(null);
   };
 
   return (
@@ -76,6 +80,7 @@ export default function Home() {
           fileCount={fileCount}
           done={session !== null && charts !== null}
           error={error}
+          errorStatus={errorStatus}
           onDone={() => setStage("workspace")}
           onBack={reset}
         />

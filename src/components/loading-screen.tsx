@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { AlertCircle, ArrowLeft, Check, Database, Loader2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, Clock, Database, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -12,16 +12,34 @@ const STEPS = [
   { label: "Generating dashboard" },
 ];
 
+/** The same HTTP failure reads very differently depending on cause — a rate
+ * limit or budget cap isn't a "your files are broken" problem, and telling
+ * users that is actively misleading. */
+function errorCopy(status: number | null): { title: string; useClockIcon: boolean } {
+  if (status === 429) {
+    return { title: "Slow down a little", useClockIcon: true };
+  }
+  if (status === 503) {
+    return { title: "Usage limit reached", useClockIcon: true };
+  }
+  if (status === 0) {
+    return { title: "Can't reach the server", useClockIcon: false };
+  }
+  return { title: "Couldn't process your files", useClockIcon: false };
+}
+
 export function LoadingScreen({
   fileCount,
   done,
   error,
+  errorStatus = null,
   onDone,
   onBack,
 }: {
   fileCount: number;
   done: boolean;
   error: string | null;
+  errorStatus?: number | null;
   onDone: () => void;
   onBack: () => void;
 }) {
@@ -44,17 +62,27 @@ export function LoadingScreen({
   }, [done, onDone]);
 
   if (error) {
+    const { title, useClockIcon } = errorCopy(errorStatus);
     return (
       <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4">
         <div className="pointer-events-none absolute inset-0 bg-grid-fade opacity-40" />
         <div className="relative z-10 w-full max-w-md animate-in-up rounded-2xl border border-border bg-card p-8 shadow-lg">
           <div className="flex flex-col items-center text-center">
-            <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-[color-mix(in_oklch,var(--status-critical)_14%,transparent)]">
-              <AlertCircle className="size-6 text-[var(--status-critical)]" />
+            <div
+              className={cn(
+                "mb-4 flex size-12 items-center justify-center rounded-2xl",
+                useClockIcon
+                  ? "bg-[color-mix(in_oklch,var(--status-warning)_14%,transparent)]"
+                  : "bg-[color-mix(in_oklch,var(--status-critical)_14%,transparent)]"
+              )}
+            >
+              {useClockIcon ? (
+                <Clock className="size-6 text-[var(--status-warning)]" />
+              ) : (
+                <AlertCircle className="size-6 text-[var(--status-critical)]" />
+              )}
             </div>
-            <h2 className="text-lg font-semibold tracking-tight">
-              Couldn&apos;t process your files
-            </h2>
+            <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
             <p className="mt-2 text-sm text-muted-foreground">{error}</p>
             <Button className="mt-6 gap-2" onClick={onBack}>
               <ArrowLeft className="size-4" />

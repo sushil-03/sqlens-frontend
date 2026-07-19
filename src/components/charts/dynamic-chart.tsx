@@ -176,22 +176,36 @@ function Bars({
   const categoryCount = chart.data.length;
   const capWidth = categoryCount <= 4 ? Math.max(160, categoryCount * 130) : null;
 
+  // With more than a handful of categories, horizontal labels collide into an
+  // unreadable smear — angle them instead, which needs more vertical room and
+  // tolerates longer text before truncating (it reads diagonally, not packed
+  // side by side).
+  const rotate = categoryCount > 5;
+  const truncateAt = rotate ? 14 : 10;
+  const chartHeight = HEIGHTS[size] + (rotate ? 28 : 0);
+
   return (
     <>
       <div style={capWidth ? { maxWidth: capWidth, margin: "0 auto" } : undefined}>
-        <ResponsiveContainer width="100%" height={HEIGHTS[size]}>
-          <BarChart data={chart.data} margin={{ top: 4, right: 4, left: -8, bottom: 0 }}>
+        <ResponsiveContainer width="100%" height={chartHeight}>
+          <BarChart
+            data={chart.data}
+            margin={{ top: 4, right: 4, left: -8, bottom: rotate ? 24 : 0 }}
+          >
             <CartesianGrid vertical={false} stroke="var(--gridline)" strokeDasharray="3 3" />
             <XAxis
               dataKey={xField}
               axisLine={false}
               tickLine={false}
               tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-              dy={8}
+              dy={rotate ? 4 : 8}
               interval={0}
+              angle={rotate ? -35 : 0}
+              textAnchor={rotate ? "end" : "middle"}
+              height={rotate ? 52 : 30}
               tickFormatter={(v: unknown) => {
                 const s = String(v);
-                return s.length > 10 ? `${s.slice(0, 9)}…` : s;
+                return s.length > truncateAt ? `${s.slice(0, truncateAt - 1)}…` : s;
               }}
             />
             <YAxis
@@ -333,6 +347,12 @@ function FunnelViz({
     }))
     .sort((a, b) => b.value - a.value);
   const max = data[0]?.value || 1;
+  // With many stages, later ones can be a tiny fraction of the first stage's
+  // width — an in-segment number label then overflows its sliver and reads as
+  // garbled, overlapping text. The list below already shows every exact value
+  // and percentage, so only overlay in-chart labels when segments are wide
+  // enough (few stages) for the text to actually fit.
+  const showValueLabels = data.length <= 5;
 
   return (
     <>
@@ -359,14 +379,16 @@ function FunnelViz({
               fontSize={11}
               offset={12}
             />
-            <LabelList
-              dataKey="value"
-              position="center"
-              fill="var(--primary-foreground)"
-              fontSize={11}
-              fontWeight={600}
-              formatter={(v: unknown) => formatNumber(v)}
-            />
+            {showValueLabels && (
+              <LabelList
+                dataKey="value"
+                position="center"
+                fill="var(--primary-foreground)"
+                fontSize={11}
+                fontWeight={600}
+                formatter={(v: unknown) => formatNumber(v)}
+              />
+            )}
             {data.map((d) => (
               <Cell key={d.name} fill={d.fill} />
             ))}
