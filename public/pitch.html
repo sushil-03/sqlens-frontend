@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQLens — Pitch Deck</title>
+<meta name="description" content="Upload SQL, CSV, or Excel. Get an AI-designed dashboard and a live data chatbot.">
+<style>
+  :root {
+    --bg: #0b0b0c;
+    --surface: #151517;
+    --surface-2: #1c1c1f;
+    --ink: #f2f1ee;
+    --muted: #93938d;
+    --faint: #58585433;
+    --accent: #4d93e8;
+    --accent-dim: rgba(77, 147, 232, 0.14);
+    --border: rgba(242, 241, 238, 0.09);
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+
+    --dot-1: #4d93e8;
+    --dot-2: #2fae4e;
+    --dot-3: #d9678c;
+    --dot-4: #d9a441;
+    --dot-5: #35b98a;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+  ::selection { background: var(--accent-dim); color: var(--ink); }
+
+  .bg-grid {
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(242,241,238,0.06) 1px, transparent 0);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .deck { position: relative; z-index: 1; max-width: 920px; margin: 0 auto; padding: 0 28px; }
+
+  section.slide {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 96px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  section.slide:last-of-type { border-bottom: none; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 7px; height: 7px;
+    border-radius: 999px;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+  .eyebrow .idx { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  h1, h2 {
+    font-family: var(--mono);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0 0 20px;
+  }
+  h1 { font-size: clamp(2.4rem, 5.5vw, 4.2rem); line-height: 1.05; }
+  h2 { font-size: clamp(1.6rem, 3.4vw, 2.4rem); line-height: 1.15; }
+
+  p.lede { font-size: clamp(1.05rem, 1.6vw, 1.25rem); color: var(--ink); max-width: 62ch; text-wrap: pretty; }
+  p.body-text { color: var(--muted); max-width: 62ch; font-size: 1rem; }
+
+  .kicker-wordmark {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 14px; color: var(--muted);
+    margin-bottom: 40px;
+  }
+  .kicker-wordmark .mark {
+    width: 22px; height: 22px; border-radius: 6px;
+    background: linear-gradient(135deg, var(--accent), #2a5fa8);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #06131f; font-weight: 800; font-size: 11px;
+  }
+
+  .terminal {
+    margin-top: 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 640px;
+    box-shadow: 0 20px 60px -30px rgba(0,0,0,0.7);
+  }
+  .terminal .bar { display: flex; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  .terminal .bar span { width: 9px; height: 9px; border-radius: 999px; background: var(--faint); }
+  .terminal pre {
+    margin: 0; padding: 18px 20px 22px;
+    font-family: var(--mono); font-size: 13px; color: #d7d6d0;
+    overflow-x: auto; white-space: pre;
+  }
+  .terminal .prompt { color: var(--accent); }
+  .terminal .comment { color: var(--muted); }
+  .terminal .out { color: #9fd394; }
+
+  ul.plain { list-style: none; margin: 28px 0 0; padding: 0; display: flex; flex-direction: column; gap: 16px; max-width: 62ch; }
+  ul.plain li { display: flex; gap: 14px; align-items: baseline; color: var(--muted); font-size: 0.98rem; }
+  ul.plain li .x { font-family: var(--mono); color: #d9678c; flex-shrink: 0; font-size: 0.85rem; }
+
+  .flow {
+    margin-top: 44px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .flow .step { background: var(--surface); padding: 26px 20px; display: flex; flex-direction: column; gap: 10px; }
+  .flow .step .n { font-family: var(--mono); color: var(--accent); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .flow .step h3 { font-family: var(--sans); font-size: 0.98rem; font-weight: 650; margin: 0; color: var(--ink); }
+  .flow .step p { margin: 0; font-size: 0.86rem; color: var(--muted); }
+
+  .grid-cards { margin-top: 40px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px 22px 24px; }
+  .card .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+  .card .dots span { width: 8px; height: 8px; border-radius: 999px; }
+  .card h3 { font-size: 1rem; margin: 0 0 8px; font-weight: 650; }
+  .card p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+
+  .arch {
+    margin-top: 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px 28px;
+    overflow-x: auto;
+  }
+  .arch-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .arch-box {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    border-radius: 10px;
+    padding: 14px 18px;
+    white-space: nowrap;
+  }
+  .arch-box.accent { border-color: rgba(77,147,232,0.4); color: var(--accent); }
+  .arch-arrow { font-family: var(--mono); color: var(--muted); font-size: 0.78rem; text-align: center; white-space: nowrap; }
+  .arch-branch {
+    margin: 22px 0 0 0;
+    padding-top: 20px;
+    border-top: 1px dashed var(--border);
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+  }
+  .arch-branch .lbl { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  .safety-list { margin-top: 36px; display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--border); }
+  .safety-list .row { display: grid; grid-template-columns: 200px 1fr; gap: 24px; padding: 18px 0; border-bottom: 1px solid var(--border); }
+  .safety-list .row .label { font-family: var(--mono); font-size: 0.82rem; color: var(--accent); letter-spacing: 0.02em; }
+  .safety-list .row .desc { color: var(--muted); font-size: 0.92rem; }
+  .safety-list .row .desc b { color: var(--ink); font-weight: 600; }
+
+  .stack-chips { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip { font-family: var(--mono); font-size: 0.8rem; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); background: var(--surface); }
+
+  .cta-links { margin-top: 44px; display: flex; flex-direction: column; gap: 14px; max-width: 62ch; }
+  .cta-links a {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 20px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; text-decoration: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .cta-links a:hover { border-color: var(--accent); background: var(--surface-2); }
+  .cta-links .t { font-size: 0.95rem; font-weight: 600; }
+  .cta-links .u { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
+
+  .rail {
+    position: fixed; right: 26px; top: 50%; transform: translateY(-50%);
+    z-index: 5; display: flex; flex-direction: column; gap: 14px;
+  }
+  .rail a {
+    width: 8px; height: 8px; border-radius: 999px; background: var(--faint);
+    display: block; text-decoration: none;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .rail a:hover { background: var(--accent); transform: scale(1.3); }
+
+  footer.deck-footer {
+    padding: 40px 0 64px; color: var(--faint);
+    font-family: var(--mono); font-size: 0.78rem;
+    display: flex; justify-content: space-between;
+  }
+
+  @media (max-width: 720px) {
+    .rail { display: none; }
+    .flow { grid-template-columns: 1fr 1fr; }
+    .grid-cards { grid-template-columns: 1fr; }
+    .safety-list .row { grid-template-columns: 1fr; gap: 6px; }
+    .arch-row { flex-direction: column; align-items: stretch; }
+    .arch-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+
+<nav class="rail" aria-label="Slide navigation">
+  <a href="#s1" title="SQLens"></a>
+  <a href="#s2" title="The problem"></a>
+  <a href="#s3" title="The idea"></a>
+  <a href="#s4" title="How it works"></a>
+  <a href="#s5" title="What's built"></a>
+  <a href="#s6" title="Architecture"></a>
+  <a href="#s7" title="Safety & cost"></a>
+  <a href="#s8" title="Stack"></a>
+  <a href="#s9" title="Try it"></a>
+</nav>
+
+<div class="deck">
+
+  <section class="slide" id="s1">
+    <div class="kicker-wordmark"><span class="mark">S</span>SQLENS · HACKATHON PITCH</div>
+    <h1>Point it at a spreadsheet.<br>Get an analyst, not a chart.</h1>
+    <p class="lede">
+      Upload a SQL dump, a CSV, or an Excel export — any mix, multiple files at
+      once — and SQLens reads the schema, designs a dashboard around what
+      actually matters in <em>this</em> data, and sticks around to answer
+      follow-up questions in plain English.
+    </p>
+    <div class="terminal">
+      <div class="bar"><span></span><span></span><span></span></div>
+      <pre><span class="comment"># three files, one upload</span>
+<span class="prompt">$</span> customers.sql  orders.sql  products.sql
+
+<span class="comment"># SQLens infers the join on its own</span>
+<span class="out">→ orders.customer_id -&gt; customers.id</span>
+<span class="out">→ order_items.product_id -&gt; products.id</span>
+
+<span class="comment"># then designs the dashboard and waits for you</span>
+<span class="prompt">you:</span> which lead source actually converts?</pre>
+    </div>
+  </section>
+
+  <section class="slide" id="s2">
+    <div class="eyebrow"><span class="idx">01</span> The problem</div>
+    <h2>Every export is a dead end until someone with time and SQL shows up.</h2>
+    <p class="body-text">
+      Data teams ship dumps and CSVs constantly — CRM exports, admissions
+      pipelines, order histories. Almost none of it gets looked at twice.
+    </p>
+    <ul class="plain">
+      <li><span class="x">×</span> Building a real dashboard means a BI person, a ticket, and a few days.</li>
+      <li><span class="x">×</span> Asking one follow-up question means finding whoever knows SQL.</li>
+      <li><span class="x">×</span> Multi-file exports (leads + applications, customers + orders) usually
+        never get joined at all — they just sit as separate files.</li>
+    </ul>
+  </section>
+
+  <section class="slide" id="s3">
+    <div class="eyebrow"><span class="idx">02</span> The idea</div>
+    <h2>Upload the file. The AI does the analyst's job.</h2>
+    <p class="lede">
+      Not a chatbot bolted onto a spreadsheet — SQLens actually reads your
+      schema and relationships, decides what's worth showing, writes the SQL
+      itself, and keeps a live conversation open once the dashboard exists.
+    </p>
+  </section>
+
+  <section class="slide" id="s4">
+    <div class="eyebrow"><span class="idx">03</span> How it works</div>
+    <h2>Upload to dashboard in under a minute.</h2>
+    <div class="flow">
+      <div class="step">
+        <span class="n">01</span>
+        <h3>Upload</h3>
+        <p>SQL, CSV, or Excel — one file or several related ones at once.</p>
+      </div>
+      <div class="step">
+        <span class="n">02</span>
+        <h3>Understand</h3>
+        <p>Extracts schema and row counts; reads declared foreign keys and
+          infers the rest from column names and sample data.</p>
+      </div>
+      <div class="step">
+        <span class="n">03</span>
+        <h3>Design</h3>
+        <p>Picks chart types deliberately — funnel, scatter, trend, not just
+          bar-everything — and writes one key insight in plain English.</p>
+      </div>
+      <div class="step">
+        <span class="n">04</span>
+        <h3>Converse</h3>
+        <p>Ask a follow-up. It writes SQL live over the same connection and
+          answers in text, with the query shown.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="s5">
+    <div class="eyebrow"><span class="idx">04</span> What's built</div>
+    <h2>Not a demo trick — the whole loop is real.</h2>
+    <div class="grid-cards">
+      <div class="card">
+        <div class="dots"><span style="background:var(--dot-1)"></span><span style="background:var(--dot-2)"></span><span style="background:var(--dot-3)"></span></div>
+        <h3>Multi-file ingestion</h3>
+        <p>SQL, CSV, and Excel in one upload, loaded into a shared database so cross-file joins just work.</p>
+      </div>
+      <div class="card">
+        <div class="dots"><span style="background:var(--dot-4)"></span><span style="background:var(--dot-1)"></span></div>
+        <h3>AI-designed dashboard</h3>
+        <p>A bento-style layout sized to what each chart actually needs, plus a written key insight.</p>
+      </div>
+      <div class="card">
+        <div class="dots"><span style="background:var(--dot-2)"></span><span style="background:var(--dot-5)"></span></div>
+        <h3>Live chat, real SQL</h3>
+        <p>Streams over WebSocket, shows the query it ran, retries cleanly on failure.</p>
+      </div>
+      <div class="card">
+        <div class="dots"><span style="background:var(--dot-3)"></span></div>
+        <h3>Knowledge injection</h3>
+        <p>Tell it what the columns actually mean — it steers both the dashboard and the chat.</p>
+      </div>
+      <div class="card">
+        <div class="dots"><span style="background:var(--dot-1)"></span><span style="background:var(--dot-4)"></span></div>
+        <h3>Per-chart controls</h3>
+        <p>Refresh, expand, remove, or export any chart as a PNG or CSV.</p>
+      </div>
+      <div class="card">
+        <div class="dots"><span style="background:var(--dot-5)"></span><span style="background:var(--dot-2)"></span></div>
+        <h3>Shareable report</h3>
+        <p>One click exports the dashboard, chat transcript, and every SQL query as markdown.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="s6">
+    <div class="eyebrow"><span class="idx">05</span> Under the hood</div>
+    <h2>Two services, one AI doing two different jobs.</h2>
+    <div class="arch">
+      <div class="arch-row">
+        <div class="arch-box">Browser<br>Next.js + shadcn</div>
+        <div class="arch-arrow">upload / REST<br>↔<br>live chat, WebSocket<br>→</div>
+        <div class="arch-box accent">FastAPI backend</div>
+        <div class="arch-arrow">structured output: dashboard spec<br>tool use: run_sql_query<br>→</div>
+        <div class="arch-box">Claude</div>
+      </div>
+      <div class="arch-branch">
+        <span class="lbl">backend also talks to</span>
+        <div class="arch-box">Per-session SQLite (guarded execute_safe())</div>
+        <div class="arch-box">Session persistence (sidecar JSON)</div>
+      </div>
+    </div>
+    <p class="body-text" style="margin-top:24px;">
+      Dashboard generation uses Claude's structured outputs to get a typed
+      chart spec back directly. Chat uses tool use so Claude can write and
+      re-write SQL across a conversation instead of one-shot guessing.
+    </p>
+  </section>
+
+  <section class="slide" id="s7">
+    <div class="eyebrow"><span class="idx">06</span> Safety &amp; cost</div>
+    <h2>Built assuming someone will try to break it.</h2>
+    <div class="safety-list">
+      <div class="row">
+        <div class="label">GUARDRAILS</div>
+        <div class="desc">Every AI-written query runs on a <b>read-only connection</b>,
+          SELECT-only, single-statement, row-capped, and timed out — enforced
+          by SQLite itself, not just application logic.</div>
+      </div>
+      <div class="row">
+        <div class="label">RATE LIMITS</div>
+        <div class="desc">Capped per session <b>and</b> per IP — a fresh upload
+          can't be used to reset a session's quota.</div>
+      </div>
+      <div class="row">
+        <div class="label">HARD BUDGET</div>
+        <div class="desc">A real, persisted <b>dollar ceiling</b> across every
+          user — once hit, every AI call stops until it's raised, and a
+          restart can't quietly reset the clock.</div>
+      </div>
+      <div class="row">
+        <div class="label">RESILIENCE</div>
+        <div class="desc">Sessions survive a backend restart; transient AI
+          failures retry automatically; the rest surface as a clear message
+          with a one-click retry.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="s8">
+    <div class="eyebrow"><span class="idx">07</span> Stack</div>
+    <h2>Ordinary parts, deliberately assembled.</h2>
+    <div class="stack-chips">
+      <span class="chip">Next.js 16</span>
+      <span class="chip">TypeScript</span>
+      <span class="chip">shadcn/ui</span>
+      <span class="chip">Recharts</span>
+      <span class="chip">FastAPI</span>
+      <span class="chip">SQLite</span>
+      <span class="chip">Claude API</span>
+      <span class="chip">WebSockets</span>
+      <span class="chip">Vercel</span>
+      <span class="chip">Render</span>
+    </div>
+  </section>
+
+  <section class="slide" id="s9">
+    <div class="eyebrow"><span class="idx">08</span> Try it</div>
+    <h2>It's live. Upload something real.</h2>
+    <div class="cta-links">
+      <a href="https://sqlens-frontend.vercel.app" target="_blank" rel="noreferrer">
+        <span class="t">Live app</span>
+        <span class="u">sqlens-frontend.vercel.app</span>
+      </a>
+      <a href="https://github.com/sushil-03/sqlens-frontend" target="_blank" rel="noreferrer">
+        <span class="t">Frontend repo</span>
+        <span class="u">github.com/sushil-03/sqlens-frontend</span>
+      </a>
+      <a href="https://github.com/sushil-03/sqlens-backend" target="_blank" rel="noreferrer">
+        <span class="t">Backend repo</span>
+        <span class="u">github.com/sushil-03/sqlens-backend</span>
+      </a>
+    </div>
+    <footer class="deck-footer">
+      <span>SQLENS</span>
+      <span>08 / 08</span>
+    </footer>
+  </section>
+
+</div>
+</body>
+</html>
