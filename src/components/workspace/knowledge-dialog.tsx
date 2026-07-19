@@ -64,7 +64,7 @@ export function KnowledgeDialog({
             Add knowledge
           </DialogTitle>
           <DialogDescription>
-            Give Claude business context it can&apos;t infer from the data alone —
+            Give the AI business context it can&apos;t infer from the data alone —
             what columns mean, definitions, or what matters most. This applies to
             both the dashboard and chat, and regenerates the dashboard once saved.
           </DialogDescription>

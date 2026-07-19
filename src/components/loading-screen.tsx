@@ -83,7 +83,7 @@ export function LoadingScreen({
             Analyzing your data
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {fileCount} file{fileCount === 1 ? "" : "s"} · Claude is designing
+            {fileCount} file{fileCount === 1 ? "" : "s"} · AI is designing
             your dashboard — this can take up to a minute
           </p>
         </div>

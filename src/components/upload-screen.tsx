@@ -195,7 +195,7 @@ export function UploadScreen({
                 <Textarea
                   value={context}
                   onChange={(e) => setContext(e.target.value)}
-                  placeholder="Anything Claude should know — what the columns mean, business terms, what you care about most (e.g. 'status=Open means still active; focus on the admissions funnel')"
+                  placeholder="Anything the AI should know — what the columns mean, business terms, what you care about most (e.g. 'status=Open means still active; focus on the admissions funnel')"
                   rows={3}
                   className="resize-none text-xs"
                   maxLength={4000}

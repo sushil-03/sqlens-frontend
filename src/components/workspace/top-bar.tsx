@@ -78,7 +78,7 @@ export function TopBar({
               <div className="flex flex-col gap-0.5 tabular-nums">
                 <span>Input: {usage.input_tokens.toLocaleString()} tokens</span>
                 <span>Output: {usage.output_tokens.toLocaleString()} tokens</span>
-                <span>Claude calls: {usage.claude_calls}</span>
+                <span>AI calls: {usage.claude_calls}</span>
                 {usage.cost_usd !== undefined && (
                   <span>Est. cost: {formatCost(usage.cost_usd)}</span>
                 )}

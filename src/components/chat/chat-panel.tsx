@@ -98,7 +98,7 @@ export function ChatPanel({
               </div>
               <p className="text-sm font-medium">Ask anything about your data</p>
               <p className="max-w-[240px] text-xs text-muted-foreground">
-                Questions are answered by Claude, which writes and runs SQL
+                Questions are answered by AI, which writes and runs SQL
                 against your uploaded dataset.
               </p>
             </div>
